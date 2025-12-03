@@ -20,31 +20,31 @@ head(divvy_data)
 # You can also specify the number of rows you want to see, e.g., the first 10 rows:
 # print(head(divvy_data, n = 10))
 
-*** Now I want to print the columns names of the data frame. ***
+***Now I want to print the columns names of the data frame.***
 
 ```{r column-names, echo=FALSE}
 colnames(divvy_data)
 ```
 
-*** Now I want to print the structure of the data frame. ***
+***Now I want to print the structure of the data frame.***
 
 ```{r structure-data, echo=FALSE}
 str(divvy_data)
 
 ```
 
-*** Now I want to print the summary of the data frame. ***
+***Now I want to print the summary of the data frame.***
 
 ```{r summary-data, echo=FALSE}
 summary(divvy_data)
 ```
 
-*** Now I need to check the number of usertypes in the data frame. ***
+***Now I need to check the number of usertypes in the data frame.***
 
 ```{r unique-usertypes, echo=FALSE}
 unique(divvy_data$usertype)
 ```
-*** I need to see the number of unique Subscribers vs Customers in the data frame. ***
+***I need to see the number of unique Subscribers vs Customers in the data frame.***
 ```{r count-usertypes, echo=FALSE}
 table(divvy_data$usertype)
 ```
@@ -57,7 +57,7 @@ head(divvy_data_q2)
 head(divvy_data_q3)
 head(divvy_data_q4)
 ```
-*** adding a collumn for quarter to all four datasets indicating the quarter ***
+***adding a collumn for quarter to all four datasets indicating the quarter***
 ```{r add-quarter-column}
 divvy_data$quarter <- "Q1"
 divvy_data_q2$quarter <- "Q2"
@@ -65,16 +65,133 @@ divvy_data_q3$quarter <- "Q3"
 divvy_data_q4$quarter <- "Q4"
 ```
 
-*** Combine all four quarters of Divvy trip data into a single data frame. ***
-```{r combine-trip-data}
-divvy_data_all <- rbind(divvy_data, divvy_data_q2, divvy_data_q3, divvy_data_q4)
-head(divvy_data_all)
-```
-
-*** Check the structure difference between the four dataframes ***
+***Check the structure difference between the four dataframes***
 ```{r check-structure}
 names(divvy_data)
 names(divvy_data_q2)
 names(divvy_data_q3)
-names(divvy_data_q4)  
+names(divvy_data_q4)
+```
+***Renaming the columns of Q2 data frame to match the other dataframes***
+```{r rename-columns-q2}
+target_names <- names(divvy_data)
+names(divvy_data_q2) <- target_names
+names(divvy_data_q2)
+```
+***Now combine all four quarters of Divvy trip data into a single data frame again.***
+```{r combine-trip-data-final}
+divvy_data_all <- rbind(divvy_data, divvy_data_q2, divvy_data_q3, divvy_data_q4)
+head(divvy_data_all)
+```
+***saving the new dataframe in a csv file***
+```{r save-combined-data}
+write.csv(divvy_data_all,
+          "Divvy_Trips_2019_All_Quarters.csv",
+          row.names = FALSE)
+```
+***Using janitor package to clean the column names of the combined data frame***
+```{r load-janitor}
+install.packages("janitor")
+library(janitor)
+divvy_data_all <- clean_names(divvy_data_all)
+```
+***It is time for the data cleaning phase now. First, I will check for missing values in the combined data frame. ***
+```{r check-missing-values}
+colSums(is.na(divvy_data_all))
+```
+***Some entries are note empty in the sense of "na" but they are just blank. I will check for those as well.***
+```{r check-blank-values}
+sum(divvy_data_all$gender == "")
+```
+```{r load-dplyr} 
+install.packages("dplyr")
+library(dplyr)
+```
+```{r check-raws-by-quarter}
+trips_by_quarter <- divvy_data_all |>
+  group_by(quarter) |>
+  summarize(total_trips = n())
+```
+***Correcting the data type of the "tripduration" column from character to numeric***
+```{r correct-tripduration-type}
+divvy_data_all$tripduration <- as.numeric(divvy_data_all$tripduration)
+str(divvy_data_all$tripduration)
+```
+***checking the number of customers vs subscribers in the combined data frame***
+```{r check-usertypes-combined}
+table(divvy_data_all$usertype)
+```
+***converting start_time and end_time columns to date-time format***
+```{r convert-datetime}
+divvy_data_all$start_time <- as.POSIXct(divvy_data_all$start_time, format="%Y-%m-%d %H:%M:%S")
+divvy_data_all$end_time <- as.POSIXct(divvy_data_all$end_time, format="%Y-%m-%d %H:%M:%S")
+str(divvy_data_all$start_time)
+str(divvy_data_all$end_time)
+```
+***Average duration of trips by usertype***
+```{r average-duration-by-usertype}
+average_duration_by_usertype <- divvy_data_all |>
+  group_by(usertype) |>
+  summarize(average_duration = mean(tripduration, na.rm = TRUE))
+average_duration_by_usertype
+```
+***installing ggplot2 package for visualization***
+```{r load-ggplot2}
+install.packages("ggplot2")
+library(ggplot2)
+```
+***Number of trips by quarter shown in a bar chart using ggplot2***
+```{r display-trips-by-quarter, echo=FALSE}
+ggplot(trips_by_quarter, aes(x = quarter, y = total_trips)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(title = "Number of Trips by Quarter",
+       x = "Quarter",
+       y = "Number of Trips") +
+  theme_minimal()
+```
+***Now I will check the number of trips by usertype (Subscriber vs Customer) in ggplot2***
+```{r trips-by-usertype}
+trips_by_usertype <- divvy_data_all |>
+  group_by(usertype) |>
+  summarize(total_trips = n())
+```
+***Number of trips by usertype shown in a bar chart using ggplot2***
+```{r display-trips-by-usertype, echo=FALSE}
+ggplot(trips_by_usertype, aes(x = usertype, y = total_trips)) +
+  geom_bar(stat = "identity", fill = "green") +
+  labs(title = "Number of Trips by Usertype",
+       x = "Usertype",
+       y = "Number of Trips") +
+  theme_minimal()
+```
+***Now I will check the gender of subscribers vs customers in ggplot2***
+```{r trips by gender   }
+trips_by_gender <- divvy_data_all |>
+  group_by(gender) |>
+  summarize(total_trips = n())
+```
+***Number of trips by gender shown in a bar chart using ggplot2***
+```{r display-trips-by-gender, echo=FALSE}      
+ggplot(trips_by_gender, aes(x = gender, y = total_trips)) +
+  geom_bar(stat = "identity", fill = "purple") +
+  labs(title = "Number of Trips by Gender",
+       x = "Gender",
+       y = "Number of Trips") +
+  theme_minimal()
+```
+
+***Now I will check the gender distribution for subscribers vs customers in ggplot2***
+```{r trips by gender for subscribers vs customers}
+trips_by_gender_usertype <- divvy_data_all |>
+  group_by(gender, usertype) |>
+  summarize(total_trips = n())
+```
+***Number of trips by gender for subscribers vs customers shown in a bar chart using ggplot2***
+```{r display-trips-by-gender-usertype, echo=FALSE}
+ggplot(trips_by_gender_usertype, aes(x = gender, y = total_trips, fill = usertype)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Number of Trips by Gender for Subscribers vs Customers",
+       x = "Gender",
+       y = "Number of Trips") +
+  theme_minimal()
 ```
