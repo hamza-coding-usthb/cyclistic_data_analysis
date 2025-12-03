@@ -1,0 +1,80 @@
+---
+title: "Divvy Trip Data Analysis"
+output: pdf_document
+---
+
+## Setup and Data Loading
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+```{r load-data}
+divvy_data <- read.csv("Divvy_Trips_2019_Q1.csv", header = TRUE)
+```
+
+# Display the first 6 rows of the data frame (default behavior of head())
+```{r display-data, echo=FALSE}
+head(divvy_data)
+```
+# You can also specify the number of rows you want to see, e.g., the first 10 rows:
+# print(head(divvy_data, n = 10))
+
+*** Now I want to print the columns names of the data frame. ***
+
+```{r column-names, echo=FALSE}
+colnames(divvy_data)
+```
+
+*** Now I want to print the structure of the data frame. ***
+
+```{r structure-data, echo=FALSE}
+str(divvy_data)
+
+```
+
+*** Now I want to print the summary of the data frame. ***
+
+```{r summary-data, echo=FALSE}
+summary(divvy_data)
+```
+
+*** Now I need to check the number of usertypes in the data frame. ***
+
+```{r unique-usertypes, echo=FALSE}
+unique(divvy_data$usertype)
+```
+*** I need to see the number of unique Subscribers vs Customers in the data frame. ***
+```{r count-usertypes, echo=FALSE}
+table(divvy_data$usertype)
+```
+***I need to load the csv file named "Divvy_Trips_2019_Q2.csv" and 2019_Q3 2019_Q4 into R and print the first 6 rows of the data frame.***
+```{r load-data-data}
+divvy_data_q2 <- read.csv("Divvy_Trips_2019_Q2.csv", header = TRUE)
+divvy_data_q3 <- read.csv("Divvy_Trips_2019_Q3.csv", header = TRUE)
+divvy_data_q4 <- read.csv("Divvy_Trips_2019_Q4.csv", header = TRUE)
+head(divvy_data_q2)
+head(divvy_data_q3)
+head(divvy_data_q4)
+```
+*** adding a collumn for quarter to all four datasets indicating the quarter ***
+```{r add-quarter-column}
+divvy_data$quarter <- "Q1"
+divvy_data_q2$quarter <- "Q2"
+divvy_data_q3$quarter <- "Q3"
+divvy_data_q4$quarter <- "Q4"
+```
+
+*** Combine all four quarters of Divvy trip data into a single data frame. ***
+```{r combine-trip-data}
+divvy_data_all <- rbind(divvy_data, divvy_data_q2, divvy_data_q3, divvy_data_q4)
+head(divvy_data_all)
+```
+
+*** Check the structure difference between the four dataframes ***
+```{r check-structure}
+names(divvy_data)
+names(divvy_data_q2)
+names(divvy_data_q3)
+names(divvy_data_q4)  
+```
