@@ -1,0 +1,18 @@
+---
+title: "My Analysis Report"
+author: "Hamza Taourirt"
+date: "December 3, 2025"
+output: html_document
+---
+# Introduction
+
+This report presents an analysis of Divvy trip data for the year 2019, 
+focusing on user types, gender age and trip patterns across different quarters.
+
+# Otline of the Analysis
+* Loading and inspecting the data
+* Data cleaning and preparation
+* Exploratory data analysis
+* Visualizations and insights
+* Conclusion
+

@@ -188,10 +188,46 @@ trips_by_gender_usertype <- divvy_data_all |>
 ```
 ***Number of trips by gender for subscribers vs customers shown in a bar chart using ggplot2***
 ```{r display-trips-by-gender-usertype, echo=FALSE}
-ggplot(trips_by_gender_usertype, aes(x = gender, y = total_trips, fill = usertype)) +
+ggplot(trips_by_gender_usertype,
+       aes(x = gender, y = total_trips, fill = usertype)) +
   geom_bar(stat = "identity") +
   labs(title = "Number of Trips by Gender for Subscribers vs Customers",
        x = "Gender",
        y = "Number of Trips") +
   theme_minimal()
 ```
+**Number of subscribers vs customers for each quarter shown in a bar chart using ggplot2**
+```{r trips-by-usertype-by-quarter} 
+trips_by_usertype_by_quarter <- divvy_data_all |>
+  group_by(quarter, usertype) |>
+  summarize(total_trips = n())
+```
+***Number of trips by quarter for subscribers vs customers shown in a bar chart using ggplot2***
+```{r display-trips-by-usertype-by-quarter, echo=FALSE}
+ggplot(trips_by_usertype_by_quarter,
+       aes(x = quarter, y = total_trips, fill = usertype)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Number of Trips by Usertype for Each Quarter",
+       x = "Quarter",
+       y = "Number of Trips") +
+  theme_minimal()
+``` 
+***Check the number of subscribers vs custumers by age of the riders ,if age is provided***
+```{r trips-by-usertype-by-age}
+current_year <- 2019
+divvy_data_all$age <- current_year - divvy_data_all$birthyear
+trips_by_usertype_by_age <- divvy_data_all |>
+  filter(age >= 10 & age <= 75) |> # Filter ages between 10 and 75
+  group_by(usertype, age) |>
+  summarize(total_trips = n())
+```
+***Number of trips by age for subscribers vs customers shown in a line chart using ggplot2***
+```{r display-trips-by-usertype-by-age, echo=FALSE}
+ggplot(trips_by_usertype_by_age,
+       aes(x = age, y = total_trips, color = usertype)) +
+  geom_line() +
+  labs(title = "Number of Trips by Usertype for Each Age",
+       x = "Age",
+       y = "Number of Trips") +
+  theme_minimal()
+```  
